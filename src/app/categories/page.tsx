@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
 import { columns } from './columns';
 import { ICategory } from '../models/categories/categoryModel';
+import withAuth from '@/components/AuthProtector';
 
-export default function CategoriesPage() {
+const CategoriesPage = () => {
   const [categories, setCategories] = useState<ICategory[]>([]);
 
   useEffect(() => {
@@ -33,3 +34,5 @@ export default function CategoriesPage() {
     </section>
   );
 }
+
+export default withAuth(CategoriesPage);

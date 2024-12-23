@@ -1,8 +1,10 @@
+"use client";
 import { ChartOverview } from '@/components/chart';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DollarSign, Percent, Receipt, Users } from 'lucide-react';
+import withAuth from '@/components/AuthProtector';
 
-export default function Home() {
+const Home = () => {
 
   return (
     <main className='sm:ml-14 p-4'>
@@ -74,3 +76,5 @@ export default function Home() {
     </main>
   );
 }
+
+export default withAuth(Home);

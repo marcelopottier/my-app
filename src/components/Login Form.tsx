@@ -14,8 +14,7 @@ export default function LoginForm(){
 
     async function handleLogin(e: React.FormEvent<HTMLFormElement>){
         e.preventDefault();
-        const data = new FormData(e.currentTarget);
-        
+        const data = { email, password };
         signIn('credentials',
         {
             ...data,

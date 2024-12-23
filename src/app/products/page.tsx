@@ -4,8 +4,9 @@ import { columns } from './columns'
 import productModel, { IProduct } from '../models/product/productModel';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';  
+import withAuth from '@/components/AuthProtector';
   
-export default function Page() {
+const Page = () => {
     const [products, setProducts] = useState<IProduct[]>([]);
 
     useEffect(() => {
@@ -32,3 +33,4 @@ export default function Page() {
     </section>
   )
 }
+export default withAuth(Page);

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 import { Sidebar } from "@/components/sidebar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
+import { SessionProvider } from "next-auth/react";
+import { usePathname } from "next/navigation";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -15,8 +17,11 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Criando a instância do QueryClient no lado do cliente
   const [queryClient] = useState(() => new QueryClient());
+  const pathname = usePathname();
+
+  const hideSidebarRoutes = ["/login"];
+  const shouldHideSidebar = hideSidebarRoutes.includes(pathname);
 
   return (
     <html lang="en">
@@ -26,9 +31,11 @@ export default function RootLayout({
           inter.className
         )}
       >
-        <Sidebar />
+        {!shouldHideSidebar && <Sidebar />}
         <QueryClientProvider client={queryClient}>
-          {children}
+          <SessionProvider>
+            {children}
+          </SessionProvider>
         </QueryClientProvider>
       </body>
     </html>
