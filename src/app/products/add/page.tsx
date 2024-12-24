@@ -18,6 +18,8 @@ import { Textarea } from "@/components/ui/textarea";
 import Select from "react-select";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCategories } from "@/actions";
+import { useEffect, useState } from "react";
+import { ICategory } from "@/app/models/categories/categoryModel";
 
 const validationSchema = z.object({
   name: z.string().min(1, {
@@ -66,17 +68,17 @@ const validationSchema = z.object({
 type FormValues = z.infer<typeof validationSchema>;
 
 export default function AddProduct() {
-  const queryClient = useQueryClient();
+  const [categories, setCategories] = useState<ICategory[]>([]);
 
-  const {
-    isPending,
-    isError,
-    data: categories,
-    error,
-  } = useQuery({
-    queryKey: ["categories"],
-    queryFn: getCategories,
-  });
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const response = await fetch('/api/categories');
+      const data = await response.json();
+      setCategories(data);
+    };
+
+    fetchCategories();
+  }, []);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(validationSchema),
@@ -104,25 +106,30 @@ export default function AddProduct() {
 
   const onSubmit = async (values: FormValues) => {
     try {
-      // Formata o campo 'media' para enviar os dados corretos
+      
       const mediaData = values.media.map((media) => ({
-        url: media.file ? URL.createObjectURL(media.file) : "", // A URL real precisa ser gerada depois do upload
+        url: /*media.file ? URL.createObjectURL(media.file)*/ "http:exemplo",
         description: media.description || "",
       }));
-  
+
       const formData = {
         name: values.name,
         sku: values.sku,
         category: values.category,
-        width: values.width,
-        height: values.height,
-        depth: values.depth,
-        colors: values.colors,
+        dimensions: {
+          width: values.width,
+          height: values.height,
+          depth: values.depth,
+        },
+        avaliable_colors: values.colors,
         details: values.details,
         design: values.design,
-        priceCash: values.priceCash,
-        priceInstallment: values.priceInstallment,
-        media: mediaData, // Usando os dados de mídia formatados
+        price: {
+          cash: values.priceCash,
+          installment: values.priceInstallment,
+        },
+        medias: mediaData,
+        stock: 1
       };
   
       console.log(formData);

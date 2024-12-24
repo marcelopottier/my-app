@@ -1,10 +1,13 @@
-import mongoose from 'mongoose';
+import { createClient } from '@supabase/supabase-js'
 
-export async function connectToDatabase() {
-  if (mongoose.connection.readyState === 1) {
-    return mongoose.connection.asPromise();
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+export const supabase = createClient(supabaseUrl, supabaseKey);
+
+export function connectToDatabase() {
+  if (!supabase) {
+    throw new Error('Erro ao conectar ao Supabase. Verifique as variáveis de ambiente.');
   }
-  
-  const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/mydb';
-  return mongoose.connect(uri, {});
+  return supabase;
 }

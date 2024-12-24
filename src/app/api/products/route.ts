@@ -1,98 +1,113 @@
-import productModel from '@/app/models/product/productModel';
-import { NextResponse } from 'next/server';
 
-// Endpoint para obter todas as categorias
+import { supabase } from "@/lib/mongodb";
+import { NextResponse } from "next/server";
+
+// Endpoint para obter todos os produtos
 export async function GET() {
   try {
-    const categories = await productModel.find({}).lean();
-    const formattedCategories = categories.map((category: { _id: any }) => ({
-      ...category,
-      _id: category._id.toString(),
-    }));
+    const { data: products, error } = await supabase
+      .from('products') // Nome da tabela no Supabase
+      .select('*');
 
-    return NextResponse.json(formattedCategories);
+    if (error) throw error;
+
+    return NextResponse.json(products);
   } catch (error) {
-    console.error('Erro ao buscar categorias:', error);
-    return NextResponse.json({ error: 'Erro ao buscar categorias' }, { status: 500 });
+    console.error('Erro ao buscar produtos:', error);
+    return NextResponse.json({ error: 'Erro ao buscar produtos' }, { status: 500 });
   }
 }
 
-// Endpoint para editar uma categoria
+// Endpoint para editar um produto
 export async function PUT(req: Request) {
   try {
     const { id, name, isActive } = await req.json(); // Obtém os dados da requisição
 
-    const product = await productModel.findByIdAndUpdate(
-      id,
-      { name, isActive },
-      { new: true } // Retorna o documento atualizado
-    );
+    const { data: updatedProduct, error } = await supabase
+      .from('products')
+      .update({ name, isActive })
+      .eq('id', id)
+      .select()
+      .single();
 
-    if (!product) {
-      return NextResponse.json({ error: 'Categoria não encontrada' }, { status: 404 });
+    if (error) {
+      if (error.message === "Row not found") {
+        return NextResponse.json({ error: 'Produto não encontrado' }, { status: 404 });
+      }
+      throw error;
     }
 
-    return NextResponse.json(product);
+    return NextResponse.json(updatedProduct);
   } catch (error) {
-    console.error('Erro ao editar categoria:', error);
-    return NextResponse.json({ error: 'Erro ao editar categoria' }, { status: 500 });
+    console.error('Erro ao editar produto:', error);
+    return NextResponse.json({ error: 'Erro ao editar produto' }, { status: 500 });
   }
 }
 
+// Endpoint para excluir um produto
 export async function DELETE(req: Request) {
   try {
     const { id } = await req.json();
 
-    const product = await productModel.findByIdAndDelete(id);
+    const { data, error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id);
 
-    if (!product) {
-      return NextResponse.json({ error: 'Categoria não encontrada' }, { status: 404 });
+    if (error) {
+      if (error.message === "Row not found") {
+        return NextResponse.json({ error: 'Produto não encontrado' }, { status: 404 });
+      }
+      throw error;
     }
 
-    return NextResponse.json({ message: 'Categoria excluída com sucesso' });
+    return NextResponse.json({ message: 'Produto excluído com sucesso' });
   } catch (error) {
-    console.error('Erro ao excluir categoria:', error);
-    return NextResponse.json({ error: 'Erro ao excluir categoria' }, { status: 500 });
+    console.error('Erro ao excluir produto:', error);
+    return NextResponse.json({ error: 'Erro ao excluir produto' }, { status: 500 });
   }
 }
 
+// Endpoint para criar um novo produto
 export async function POST(req: Request) {
   try {
-    // Extrair os dados do corpo da requisição
     const {
+      name,
       sku,
-      uniqueId,
       category,
       dimensions,
-      availableColors,
-      description,
+      available_colors,
+      details,
       design,
       price,
       medias,
       stock,
     } = await req.json();
 
-    // Criar o novo produto com os dados recebidos
-    const newProduct = new productModel({
-      sku,
-      uniqueId, // ID único obrigatório
-      category,
-      dimensions, // Contém width, height e depth
-      availableColors,
-      description,
-      design,
-      price, // Contém cash e installment
-      medias, // Lista de mídias
-      stock,
-    });
 
-    // Salvar o novo produto no banco de dados
-    await newProduct.save();
+    const { data: newProduct, error } = await supabase
+      .from('products')
+      .insert([
+        {
+          name,
+          sku,
+          category,
+          dimensions,
+          available_colors,
+          details,
+          design,
+          price,
+          medias,
+          stock,
+        },
+      ])
+      .select()
+      .single();
 
-    // Retornar o produto criado com sucesso
+    if (error) throw error;
+
     return NextResponse.json(newProduct, { status: 201 });
   } catch (error) {
-    // Em caso de erro, exibir a mensagem de erro no console e retornar resposta de erro
     console.error('Erro ao criar produto:', error);
     return NextResponse.json({ error: 'Erro ao criar produto', data: error }, { status: 500 });
   }

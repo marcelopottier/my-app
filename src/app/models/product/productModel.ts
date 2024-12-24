@@ -1,6 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
-
-export interface IProduct extends Document {
+export interface IProduct {
   name: string;
   sku?: string; // SKU opcional
   uniqueId: string; // ID único obrigatório
@@ -23,31 +21,3 @@ export interface IProduct extends Document {
   }[]; // Lista de mídias (fotos/vídeos)
   stock: number; // Quantidade em estoque
 }
-
-const ProductSchema = new Schema<IProduct>({
-  name: { type: String, required: true }, // Nome do produto
-  sku: { type: String }, // SKU opcional
-  category: { type: String, required: true }, // Categoria do produto
-  dimensions: {
-    width: { type: Number, required: true },
-    height: { type: Number, required: true },
-    depth: { type: Number, required: true },
-  }, // Dimensões do produto
-  availableColors: { type: [String], required: true }, // Cores disponíveis
-  description: { type: String, required: true }, // Descrição/características do produto
-  design: { type: String, required: true }, // Design do produto
-  price: {
-    cash: { type: Number, required: true }, // Preço à vista
-    installment: { type: Number, required: true }, // Preço parcelado
-  },
-  medias: [
-    {
-      url: { type: String, required: true }, // URL pública do arquivo
-      description: { type: String }, // Descritivo opcional
-    },
-  ], // Mídias (fotos/vídeos)
-  stock: { type: Number, required: true }, // Estoque
-});
-
-export default mongoose.models.products || mongoose.model<IProduct>('products', ProductSchema);
-

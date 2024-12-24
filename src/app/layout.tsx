@@ -1,6 +1,5 @@
 'use client';
 
-import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -9,6 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { SessionProvider } from "next-auth/react";
 import { usePathname } from "next/navigation";
+import Toaster from "react-hot-toast";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -35,6 +35,15 @@ export default function RootLayout({
         <QueryClientProvider client={queryClient}>
           <SessionProvider>
             {children}
+            <Toaster position="top-center"
+              toastOptions= {{
+                duration: 2000,
+                style: {
+                  background: "#000000",
+                  color: "#fff"
+                }
+              }}
+            />
           </SessionProvider>
         </QueryClientProvider>
       </body>

@@ -13,6 +13,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import React, { use, useEffect, useState } from "react";
+import { redirect } from "next/dist/server/api-utils";
+import toast from "react-hot-toast";
 
 const validationSchema = z.object({
   name: z.string().min(1, {
@@ -54,8 +56,9 @@ export default function EditCategory({ params } : { params: Promise<{ slug: stri
   }, [slug, form]);
   
   const onSubmit = async (values: FormValues) => {
-    if (slug) {
+    if (slug) {      
       try {
+        values.id = slug;
         const response = await fetch(`/api/categories/${slug}`, {
           method: "PUT",
           headers: {
@@ -63,11 +66,12 @@ export default function EditCategory({ params } : { params: Promise<{ slug: stri
           },
           body: JSON.stringify(values),
         });
+        
+        const updatedCategory: any = response;
 
-        const updatedCategory = await response.json();
-        if (response.ok) {
-          alert(`Categoria ${updatedCategory.name} atualizada com sucesso`);
-          router.push("/categories"); // Redireciona para a lista de categorias
+        if (response) {
+          toast.success(`Categoria ${updatedCategory.name} atualizada com sucesso`);
+          
         } else {
           alert("Erro ao atualizar categoria");
         }
@@ -106,7 +110,7 @@ export default function EditCategory({ params } : { params: Promise<{ slug: stri
                   </FormItem>
                 )}
               />
-
+              <Button onClick={ () => toast.success('teste' )}></Button>
               {/* isActive */}
               <FormField
                 name="isActive"

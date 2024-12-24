@@ -1,8 +1,7 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
-import { connectToDatabase } from "@/lib/mongodb";
-import userModel from "@/app/models/users/userModel";
+import { supabase } from "@/lib/mongodb";
 
 const handler = NextAuth({
   pages: {
@@ -16,11 +15,21 @@ const handler = NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials, req) {
-        await connectToDatabase();
-        console.log('CREDENCIAISSS:', credentials);
-        const user = await userModel.findOne({ email: credentials?.email });
+        const { email, password } = credentials || {};
+
+        if (!email || !password) {
+          throw new Error("Credenciais não fornecidas");
+        }
+
+        const { data: user, error } = await supabase
+         .from("users")
+         .select("*")
+         .eq("email", email)
+         .single();
         
-        console.log(user);
+        if (error || !user) {
+          throw new Error("Usuário não encontrado");
+        }
         
         if (user) {
           const isPasswordValid = await bcrypt.compare(credentials!.password, user.password);
@@ -29,8 +38,8 @@ const handler = NextAuth({
           }
 
           return {
-            id: user._id.toString(),
-            name: user.name,
+            id: user.id,
+            name: user.username,
             email: user.email,
           };
         } else {

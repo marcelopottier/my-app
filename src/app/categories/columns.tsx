@@ -52,7 +52,7 @@ export const columns: ColumnDef<ICategory>[] = [
     accessorKey: "isActive",
     header: "Ativo",
     cell: ({ row }) => {
-      const isActive = row.original.isActive;
+      const isActive = row.original.is_active;
       return (
         <Badge variant={isActive ? "default" : "destructive"}>
           {isActive ? "Ativo" : "Inativo"}
@@ -83,7 +83,7 @@ export const columns: ColumnDef<ICategory>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Ações</DropdownMenuLabel>
             <DropdownMenuItem>
-              <a href={`/categories/${category._id}`}>Editar</a>
+              <a href={`/categories/${category.id}`}>Editar</a>
             </DropdownMenuItem>
             <DropdownMenuItem>
             <Button variant="destructive" onClick={openDialog}>
